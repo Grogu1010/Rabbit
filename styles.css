@@ -36,7 +36,7 @@ h1 { margin: 0; }
   100%{ color:#ec4899; }
 }
 .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
-input, button, textarea {
+input, button, textarea, select {
   width: 100%; border: 1px solid #334155; border-radius: 10px; padding: 10px 12px;
   background: #0f172a; color: #fff;
 }

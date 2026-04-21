@@ -10,7 +10,7 @@ import {
   serverTimestamp,
   runTransaction
 } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js';
-import { buildPromptDeck, buildHostVoiceLibrary } from './content.js';
+import { buildPromptDeck, buildHostVoiceLibrary, buildCallingMachineDeck } from './content.js';
 
 const firebaseConfig = window.RABBIT_FIREBASE_CONFIG || {
   apiKey: 'REPLACE_ME',
@@ -22,7 +22,8 @@ const firebaseConfig = window.RABBIT_FIREBASE_CONFIG || {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const deck = buildPromptDeck(150);
+const answeringDeck = buildPromptDeck(150);
+const callingDeck = buildCallingMachineDeck(120);
 const hostVoice = buildHostVoiceLibrary();
 
 const state = {
@@ -53,6 +54,13 @@ function renderEntry() {
         <input id="room" value="${state.roomCode}" placeholder="ABCD" maxlength="4" />
       </div>
     </div>
+    <div style="margin-top:12px;">
+      <label>Mode</label>
+      <select id="mode">
+        <option value="answering">The Answering Machine</option>
+        <option value="calling">The Calling Machine</option>
+      </select>
+    </div>
     <div class="row" style="margin-top:12px;">
       <button class="primary" id="host-btn">Host game</button>
       <button id="join-btn">Join game</button>
@@ -70,14 +78,16 @@ async function hostGame() {
   state.role = 'host';
   state.roomCode = roomCode;
   state.playerName = name;
+  const gameMode = document.querySelector('#mode')?.value || 'answering';
   const roomRef = ref(db, `rooms/${roomCode}`);
   await set(roomRef, {
     createdAt: Date.now(),
     hostId: state.playerId,
+    gameMode,
     phase: 'lobby',
     round: 1,
     hostLine: random(hostVoice.anyTime),
-    deck,
+    deck: gameMode === 'calling' ? callingDeck : answeringDeck,
     matchQueue: [],
     currentMatch: null,
     players: {
@@ -124,6 +134,7 @@ function render() {
   lobbyScreen.innerHTML = `
     <h2>Room <span class="pill">${state.roomCode}</span></h2>
     <p>${players.length} players connected.</p>
+    <p><small>Mode: <b>${state.room.gameMode === 'calling' ? 'The Calling Machine' : 'The Answering Machine'}</b></small></p>
     <div class="qr-wrap" id="qr"></div>
     <div class="host-voice">Host: ${state.room.hostLine || ''}</div>
     <ul>${players.map(([, p]) => `<li>${p.name} — ${p.score || 0} pts</li>`).join('')}</ul>
@@ -148,15 +159,16 @@ function renderPhaseView(me, isHost) {
     return;
   }
 
+  const isCallingMode = state.room.gameMode === 'calling';
   const myTurnToAnswer = currentMatch?.answerers?.includes(state.playerId);
   const canVote = phase === 'vote' && currentMatch && !currentMatch.answerers.includes(state.playerId);
   gameScreen.innerHTML = `
     <p class="pill">Round ${round}${round === 5 ? ' (Final)' : ''}</p>
-    <h2>☎️ ${currentMatch?.prompt || 'Loading...'}</h2>
+    <h2>☎️ ${isCallingMode ? `Answer: ${currentMatch?.prompt || 'Loading...'}` : currentMatch?.prompt || 'Loading...'}</h2>
     <div id="timer">${currentMatch?.timeLeft || 0}s</div>
     ${phase === 'answer' && myTurnToAnswer ? `
-      <textarea id="answer" rows="3" maxlength="180" placeholder="Answer before the beep..."></textarea>
-      <button class="primary" id="send-answer">Send answer</button>
+      <textarea id="answer" rows="3" maxlength="180" placeholder="${isCallingMode ? 'Write the question that leads to this answer...' : 'Answer before the beep...'}"></textarea>
+      <button class="primary" id="send-answer">${isCallingMode ? 'Send question' : 'Send answer'}</button>
     ` : ''}
     ${phase === 'vote' ? `
       <div class="answer-grid">
@@ -164,7 +176,7 @@ function renderPhaseView(me, isHost) {
       </div>
       <p><small>${canVote ? 'Tap to vote.' : 'You cannot vote in your own matchup.'}</small></p>
     ` : ''}
-    ${phase === 'reveal' ? `<p>Winner: <b>${currentMatch?.winnerName || 'TBD'}</b></p>` : ''}
+    ${phase === 'reveal' ? `<p>Winner: <b>${currentMatch?.winnerName || 'TBD'}</b>${isCallingMode ? ' with the best question' : ''}</p>` : ''}
     ${isHost ? '<button id="advance">Advance</button>' : ''}
   `;
 
