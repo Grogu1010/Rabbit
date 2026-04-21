@@ -1,0 +1,52 @@
+:root {
+  color-scheme: dark;
+  --bg: #111217;
+  --card: #1b1d26;
+  --accent: #fb7185;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: radial-gradient(circle at top, #1f2230 0%, var(--bg) 55%);
+  color: var(--text);
+}
+.app-shell { max-width: 1000px; margin: 0 auto; padding: 24px; }
+.hero { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
+.kicker { text-transform: uppercase; letter-spacing: .2em; color: var(--muted); margin: 0; }
+h1 { margin: 0; }
+.sub { margin-top: 4px; color: var(--muted); }
+.card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+.hidden { display: none; }
+.rabbit-logo {
+  width: 82px; height: 82px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 42px; font-weight: 900;
+  background: #000;
+  animation: logoShift 16s linear infinite;
+}
+@keyframes logoShift {
+  0%{ color:#ef4444; }
+  16%{ color:#3b82f6; }
+  33%{ color:#f59e0b; }
+  50%{ color:#a855f7; }
+  66%{ color:#2563eb; }
+  83%{ color:#f97316; }
+  100%{ color:#ec4899; }
+}
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
+input, button, textarea {
+  width: 100%; border: 1px solid #334155; border-radius: 10px; padding: 10px 12px;
+  background: #0f172a; color: #fff;
+}
+button { cursor: pointer; font-weight: 700; }
+button.primary { background: var(--accent); border: none; color: #111; }
+.pill { display:inline-block; padding:4px 10px; border-radius:999px; background:#334155; color:#cbd5e1; font-size:12px; }
+.row { display:flex; gap:10px; flex-wrap:wrap; }
+#timer { font-size: 28px; font-weight: 800; }
+.host-voice { font-style: italic; color: #fda4af; min-height: 30px; }
+.answer-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+.answer-card { background:#111827; padding:14px; border-radius:10px; min-height:95px; }
+small { color:var(--muted); }
+.qr-wrap canvas { background: white; padding: 8px; border-radius: 8px; }
