@@ -68,3 +68,32 @@ export function buildHostVoiceLibrary() {
     perfect: perfectLines
   };
 }
+
+
+const callingAnswers = [
+  "Toy Story",
+  "No",
+  "Yes, but only on Tuesdays",
+  "My lawyer said I can't answer that",
+  "Chicken nuggets",
+  "Absolutely not, captain",
+  "A haunted Roomba",
+  "That wasn't in the budget",
+  "Hmm, idk bro, do you want some seaweed?",
+  "404: confidence not found",
+  "The moon did it",
+  "Because grandma said so",
+  "A kazoo solo",
+  "I plead the fifth... and maybe the sixth",
+  "Just vibes"
+];
+
+export function buildCallingMachineDeck(size = 120) {
+  const prompts = [];
+  let idx = 0;
+  while (prompts.length < size) {
+    prompts.push(callingAnswers[idx % callingAnswers.length]);
+    idx += 1;
+  }
+  return prompts.slice(0, size);
+}
